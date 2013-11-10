@@ -1,0 +1,18 @@
+*{
+    margin: 0;
+    border: 0;
+}
+
+#imgBG{
+    z-index: 1;
+    position: absolute;
+}
+
+#rainCanvas{
+    z-index: 20;    
+    position: relative;    
+}
+
+#containerDiv{
+    margin: 20px 0 0 20px;
+}
