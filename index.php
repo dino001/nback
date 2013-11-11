@@ -14,7 +14,10 @@
             <div id="header">
                 <input type="button" value="Start" />
             </div>
-            <div id="body">
+            <div id="content">
+                <canvas id="gameCanvas" width="500" height="500">
+                </canvas>
+                <img id="imgSquare" src="image/square_blue.png" style="display: none;"/>
             </div>
             <div id="footer"> 
             </div>

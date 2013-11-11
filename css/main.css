@@ -7,3 +7,9 @@
     margin: 0 auto; /* margin auto to align center */
     width: 960px;
 }
+
+#gameCanvas{
+    background-color: rgba(200,100,100,0.4);
+    width: 500px;
+    height: 500px;
+}
