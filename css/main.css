@@ -3,16 +3,7 @@
     border: 0;
 }
 
-#imgBG{
-    z-index: 1;
-    position: absolute;
-}
-
-#rainCanvas{
-    z-index: 20;    
-    position: relative;    
-}
-
-#containerDiv{
-    margin: 20px 0 0 20px;
+#wrapper{
+    margin: 0 auto; /* margin auto to align center */
+    width: 960px;
 }
