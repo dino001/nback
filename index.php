@@ -15,9 +15,12 @@
                 <input type="button" value="Start" />
             </div>
             <div id="content">
-                <canvas id="gameCanvas" width="500" height="500">
+                <canvas id="gameCanvas" width="400" height="400">
                 </canvas>
                 <img id="imgSquare" src="image/square_blue.png" style="display: none;"/>
+                <div class="instruction space" id="pressSpace">Press SPACE to start a new session</div>
+                <div class="instruction pressA" id="pressA">Press A: Position match</div>
+                <div class="instruction pressL" id="pressL">Press L: Audio match</div>
             </div>
             <div id="footer"> 
             </div>
