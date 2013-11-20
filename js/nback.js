@@ -1,19 +1,25 @@
 function nback(){
     this.count_nback = 2; //Number n in n-back
-    this.count_trial = 3;
-    this.speed = 1200; //milisecond to answer
+    this.count_trial = 22;
+    this.speed = 2500; //milisecond to answer
     this.square_duration = 1000; //How long a square is showed before disappearing
-    this.answer_delay = 500; //Do not allow answering when playing new sound, this should be the length of the sound .wav
+    this.answer_delay = 500; //Do not allow answering when playing new sound, this should be the length of the sound file .wav
     this.current_trial = -1; //Current trial when playing, starting from 0
-    
+
     this.arr_pos = new Array(); //Array of random square position (1-9)
     this.arr_letter = new Array(); //Array of random letter
-    
+
     this.arr_audio = new Object(); //Array of buffered audio
     this.arr_chosen_letters = ['c','h','k','l','q','r','s','t'];
     this.answer_allowed = false; //Whether user can press A/L to answer
     this.show_indicator = true; //Whether the program show correct/incorrect indicator for each trial
-    
+
+    this.pressed_a = false; //Flag to know if A is pressed once
+    this.pressed_l = false; //Flag to know if L is pressed once
+
+    this.score = 0; //Total score for each session
+    this.count_game = 0; //Total game played
+
     /**
     * Load all audio(.wav) files into Audio objects
     */
@@ -27,15 +33,16 @@ function nback(){
         }        
     };
     this.buffer_audio();
-    
+
     /**
     * Initialzie the arrays for next game
     */
     this.init_game = function (){
-        
+
         var i;
         var random_letter, random_pos;
         this.current_trial = -1; 
+        this.score = 0;
         for (i=0; i< this.count_trial; i++){
             //Get random letter from the chosen letters
             random_letter = this.arr_chosen_letters[random_int(0, this.arr_chosen_letters.length-1)];            
@@ -43,17 +50,17 @@ function nback(){
             random_pos = random_int(1,9);
             this.arr_pos[i] = random_pos;
             this.arr_letter[i] = random_letter;
-            //Control the chance of nback, that is the chance that pos/letter appear the same as previous n-trial
-            if (i >= this.count_nback && random_int(1,2) == 1){
+            //Control the chance of n-back, that is the chance that pos/letter appear the same as previous n-trial
+            if (i >= this.count_nback && random_int(1,8) == 1){
                 this.arr_pos[i] = this.arr_pos[i-this.count_nback];
             }
-            if (i >= this.count_nback && random_int(1,2) == 1){
+            if (i >= this.count_nback && random_int(1,8) == 1){
                 this.arr_letter[i] = this.arr_letter[i-this.count_nback];
             }
         }
-        
+
     };
-    
+
     /**
     * Start a new game
     */
@@ -62,12 +69,13 @@ function nback(){
         this.show_next_trial();
         $("#pressSpace").html('');
     };
-    
+
     /**
     * Show square and play sound for next trial
     */
     this.show_next_trial = function(){
         if (this.current_trial < this.count_trial - 1){
+            this.calculate_score();
             this.answer_allowed = false;
             this.reset_color();
             this.current_trial++;
@@ -82,26 +90,62 @@ function nback(){
             setTimeout(function(){
                 nb.hide_square(current_pos);    
             },this.square_duration);         
-            
+
             //Show next trial
             setTimeout(function(){
                 nb.show_next_trial();
             },this.speed);       
-            
+
             //Allow answering after a quick delay
             setTimeout('nb.answer_allowed = true',this.answer_delay);
         }
-        else 
-        {
+        else {
             //End one session
+            this.calculate_score();
             this.reset_color();
             this.answer_allowed = false;
             this.current_trial = -1;
+            this.count_game++;
+            this.add_scoreboard();
             $("#pressSpace").html('Press SPACE to start a new session');
         }
-        
+
     };
     
+    /**
+    * Add current score to the scoreboard
+    */
+    this.add_scoreboard = function(){
+        var total_score = (this.count_trial - this.count_nback)*2;
+        var score_percent = Math.floor((this.score / total_score) * 100);           
+        var new_li = $("<li>").html("Session "+ this.count_game +" => " + score_percent + "%");
+        $("#scoreList").append(new_li);        
+        console.debug($("#scoreList").length);
+    };
+
+    /**
+    * Calculate score after each trial
+    */
+    this.calculate_score = function(){
+        if (this.current_trial - this.count_nback >= 0){
+            if (this.pressed_a && this.is_pos_thesame()){
+                //Pressed A correctly
+                this.score++;
+            } else if (!this.pressed_a && !this.is_pos_thesame()){
+                //Skipped A correctly
+                this.score++;
+            }
+            if (this.pressed_l && this.is_letter_thesame()){
+                //Pressed L correctly
+                this.score++;
+            } else if (!this.pressed_l && !this.is_letter_thesame()){
+                //Skipped L correctly
+                this.score++;
+            }
+        }
+        console.debug('zdb score=' + this.score);
+    }
+
     /**
     * Draw the square
     */
@@ -116,7 +160,7 @@ function nback(){
         var xpos = ((pos-1) % 3) * (square_width + 2*margin);
         ctx.drawImage(img[0], xpos + margin, ypos + margin, square_width, square_width);
     };
-    
+
     /**
     * Hide the square at input position
     */
@@ -129,15 +173,14 @@ function nback(){
         var xpos = ((pos-1) % 3) * (square_width + 2*margin);
         ctx.clearRect(xpos + margin, ypos + margin,square_width,square_width);
     };
-    
+
     /**
     * Play sound based on input letter(ch)
     */
-    this.play_sound = function (letter){
-        console.debug('lt='+letter);
+    this.play_sound = function (letter){        
         this.arr_audio[letter].play();        
     };
-    
+
     /**
     * Draw blank background
     */
@@ -164,7 +207,7 @@ function nback(){
         ctx.closePath();        
     };
     this.draw_background();   
-    
+
     /**
     * Return true if current position is the same as n-back trial position
     */
@@ -179,8 +222,8 @@ function nback(){
         };    
         return false;
     }; 
-    
-     /**
+
+    /**
     * Return true if current letter is the same as n-back trial letter
     */
     this.is_letter_thesame = function(){
@@ -194,13 +237,15 @@ function nback(){
         };    
         return false;
     }; 
-    
+
     /**
     * Reset indicator color
     */
     this.reset_color = function(){
         $("#pressA").css('color','black'); 
         $("#pressL").css('color','black'); 
+        this.pressed_a = false;
+        this.pressed_l = false;
     }     
 }
 
@@ -220,33 +265,38 @@ $(function(){
     //nb.draw_square(8);
     //nb.play_sound('t');
     //setTimeout('nb.hide_square(8)',1000);
-   
+    
     $(document).keydown(function(e){        
         if (e.which == 32){
             //Spacebar
             if (nb.current_trial < 0){
                 nb.start_game();
             }            
-        }
+        }        
         if (nb.answer_allowed && e.which == 65){
-            //A key
-            //TODO: add lock to avoid pressing twice in a trial
-            if (nb.is_pos_thesame()){
-                if (nb.show_indicator) $("#pressA").css('color','green');
-            }
-            else
-            {
-                if (nb.show_indicator) $("#pressA").css('color','red');
+            if (!nb.pressed_a){
+                //A key            
+                if (nb.is_pos_thesame()){
+                    if (nb.show_indicator) $("#pressA").css('color','green');
+                }
+                else
+                    {
+                    if (nb.show_indicator) $("#pressA").css('color','red');
+                }
+                nb.pressed_a = true;
             }
         }
         if (nb.answer_allowed && e.which == 76){
-            //L key
-            if (nb.is_letter_thesame()){
-                if (nb.show_indicator) $("#pressL").css('color','green');
-            }
-            else
-            {
-                if (nb.show_indicator) $("#pressL").css('color','red');
+            if (!nb.pressed_l){
+                //L key
+                if (nb.is_letter_thesame()){
+                    if (nb.show_indicator) $("#pressL").css('color','green');
+                }
+                else
+                    {
+                    if (nb.show_indicator) $("#pressL").css('color','red');
+                }
+                nb.pressed_l = true;
             }
         }
     });

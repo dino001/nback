@@ -25,3 +25,16 @@
     margin-left: 50px;
     height: 20px;    
 } 
+
+#content{
+    padding-top: 10px;
+}
+
+#gameDiv{
+    float: left;    
+}
+
+#scoreBoard{
+    float: left;
+    padding-left: 20px;
+}
